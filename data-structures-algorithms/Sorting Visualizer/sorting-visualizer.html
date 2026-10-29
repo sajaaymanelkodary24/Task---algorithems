@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Sorting Visualizer</h2>
+<select id="algo">
+  <option value="merge">Merge Sort</option>
+  <option value="quick">Quick Sort</option>
+</select>
+<button onclick="start()">Start</button>
+<p id="count">Comparisons: 0</p>
+<div id="bars"></div>
+
+<script>
+let a=[], comparisons=0;
+
+function draw(){
+  bars.innerHTML=a.map(x=>
+    `<span style="display:inline-block;width:20px;height:${x*3}px;
+    background:steelblue;margin:2px;vertical-align:bottom"></span>`
+  ).join("");
+  count.textContent="Comparisons: "+comparisons;
+}
+
+function wait(){return new Promise(r=>setTimeout(r,100));}
+
+async function mergeSort(a){
+  if(a.length<2)return a;
+  let m=a.length>>1;
+  let l=await mergeSort(a.slice(0,m));
+  let r=await mergeSort(a.slice(m)), out=[];
+  while(l.length&&r.length){
+    comparisons++;
+    out.push(l[0]<=r[0]?l.shift():r.shift());
+    draw(); await wait();
+  }
+  return out.concat(l,r);
+}
+
+async function quickSort(a){
+  if(a.length<2)return a;
+  let p=a[a.length>>1], l=[],r=[],e=[];
+  for(let x of a){
+    comparisons++;
+    if(x<p)l.push(x);
+    else if(x>p)r.push(x);
+    else e.push(x);
+  }
+  draw(); await wait();
+  return [...await quickSort(l),...e,...await quickSort(r)];
+}
+
+async function start(){
+  a=Array.from({length:25},()=>1+Math.floor(Math.random()*50));
+  comparisons=0;draw();
+  a=algo.value==="merge"?await mergeSort(a):await quickSort(a);
+  draw();
+}
+</script>
+</body>
+</html>

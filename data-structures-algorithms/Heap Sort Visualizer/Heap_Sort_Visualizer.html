@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Heap Sort Visualizer</h2>
+<input id="inp" value="8,3,12,5,1,9,6">
+<button onclick="start()">Start</button>
+<button onclick="next()">Next Step</button>
+<p id="info"></p>
+<div id="tree"></div>
+<div id="arr"></div>
+
+<script>
+let a=[], steps=[], pos=0;
+
+function save(i,l,r,n){
+    steps.push({a:[...a],i,l,r,n});
+}
+
+function heap(n,i){
+    let l=2*i+1,r=2*i+2,m=i;
+    save(i,l,r,n);
+    if(l<n&&a[l]>a[m])m=l;
+    if(r<n&&a[r]>a[m])m=r;
+    if(m!=i){
+        [a[i],a[m]]=[a[m],a[i]];
+        heap(n,m);
+    }
+}
+
+function start(){
+    a=inp.value.split(",").map(Number);
+    if(!a.length||a.some(x=>!Number.isFinite(x))){
+        alert("Enter valid numbers");return;
+    }
+    steps=[];pos=0;
+    for(let i=Math.floor(a.length/2)-1;i>=0;i--)
+        heap(a.length,i);
+    for(let n=a.length-1;n>0;n--){
+        [a[0],a[n]]=[a[n],a[0]];
+        save(0,1,2,n);
+        heap(n,0);
+    }
+    save(-1,-1,-1,0);
+    show();
+}
+
+function next(){
+    if(pos<steps.length-1)pos++;
+    show();
+}
+
+function show(){
+    if(!steps.length)return;
+    let s=steps[pos], b=s.a;
+    info.textContent=`Step ${pos+1}: i=${s.i}, l=${s.l}, r=${s.r}`;
+
+    arr.innerHTML=b.map((v,i)=>
+        `<span style="display:inline-block;padding:12px;
+        margin:3px;background:${i>=s.n?'lightgreen':'lightblue'}">
+        ${v}<br>${i}</span>`).join("");
+
+    tree.innerHTML=b.map((v,i)=>{
+        let d=Math.floor(Math.log2(i+1));
+        let x=100+ i*75, y=30+d*55;
+        return `<span style="display:inline-block;margin:5px;
+        padding:8px;border:1px solid blue">${v}</span>`;
+    }).join("");
+}
+</script>
+</body>
+</html>
